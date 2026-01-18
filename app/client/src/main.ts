@@ -213,15 +213,22 @@ function displayResults(response: QueryResponse, query: string) {
   // Get the results header and set up actions
   const resultsHeader = resultsSection.querySelector('.results-header') as HTMLElement;
 
-  // Remove old actions container if exists
-  const oldActionsContainer = resultsHeader.querySelector('.results-actions');
-  if (oldActionsContainer) {
-    oldActionsContainer.remove();
+  // Check if actions container already exists, otherwise create it
+  let actionsContainer = resultsHeader.querySelector('.results-actions') as HTMLElement | null;
+  if (!actionsContainer) {
+    actionsContainer = document.createElement('div');
+    actionsContainer.className = 'results-actions';
+    resultsHeader.appendChild(actionsContainer);
+
+    // Hide the original toggle button (it's no longer needed)
+    const originalToggleButton = document.getElementById('toggle-results');
+    if (originalToggleButton) {
+      originalToggleButton.style.display = 'none';
+    }
   }
 
-  // Create new actions container with download button and toggle button
-  const actionsContainer = document.createElement('div');
-  actionsContainer.className = 'results-actions';
+  // Clear the actions container for fresh buttons
+  actionsContainer.innerHTML = '';
 
   // Create download button (only if there are results)
   if (!response.error && response.results.length > 0) {
@@ -233,21 +240,15 @@ function displayResults(response: QueryResponse, query: string) {
     actionsContainer.appendChild(downloadButton);
   }
 
-  // Move the toggle button into the actions container
-  const toggleButton = document.getElementById('toggle-results') as HTMLButtonElement;
-
-  // Clone the toggle button to remove old event listeners
-  const newToggleButton = toggleButton.cloneNode(true) as HTMLButtonElement;
-  newToggleButton.addEventListener('click', () => {
+  // Create a fresh toggle button
+  const toggleButton = document.createElement('button');
+  toggleButton.className = 'toggle-button';
+  toggleButton.textContent = 'Hide';
+  toggleButton.addEventListener('click', () => {
     resultsContainer.style.display = resultsContainer.style.display === 'none' ? 'block' : 'none';
-    newToggleButton.textContent = resultsContainer.style.display === 'none' ? 'Show' : 'Hide';
+    toggleButton.textContent = resultsContainer.style.display === 'none' ? 'Show' : 'Hide';
   });
-
-  // Replace the old toggle button with the new one in the actions container
-  actionsContainer.appendChild(newToggleButton);
-
-  // Replace the old toggle button in the DOM
-  toggleButton.parentNode?.replaceChild(actionsContainer, toggleButton);
+  actionsContainer.appendChild(toggleButton);
 }
 
 // Create results table
