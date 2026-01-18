@@ -1,3 +1,6 @@
+Query,Show me all users
+SQL,SELECT * FROM users LIMIT 100;
+
 id,name,email,signup_date,age,city
 1,John Doe,john@example.com,2025-10-15,28,New York
 2,Jane Smith,jane@example.com,2025-10-20,32,Los Angeles
