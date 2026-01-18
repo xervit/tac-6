@@ -80,5 +80,57 @@ export const api = {
   // Generate random query
   async generateRandomQuery(): Promise<RandomQueryResponse> {
     return apiRequest<RandomQueryResponse>('/generate-random-query');
+  },
+
+  // Export table as CSV
+  async exportTable(tableName: string): Promise<void> {
+    const url = `${API_BASE_URL}/table/${tableName}/export`;
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = `${tableName}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Export table failed:', error);
+      throw error;
+    }
+  },
+
+  // Export query results as CSV
+  async exportResults(columns: string[], results: Record<string, unknown>[], filename?: string): Promise<void> {
+    const url = `${API_BASE_URL}/export-results`;
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ columns, results, filename })
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = filename ? `${filename}.csv` : 'query-results.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Export results failed:', error);
+      throw error;
+    }
   }
 };

@@ -182,13 +182,13 @@ async function loadDatabaseSchema() {
 
 // Display query results
 function displayResults(response: QueryResponse, query: string) {
-  
+
   const resultsSection = document.getElementById('results-section') as HTMLElement;
   const sqlDisplay = document.getElementById('sql-display') as HTMLDivElement;
   const resultsContainer = document.getElementById('results-container') as HTMLDivElement;
-  
+
   resultsSection.style.display = 'block';
-  
+
   // Display natural language query and SQL
   sqlDisplay.innerHTML = `
     <div class="query-display">
@@ -198,7 +198,7 @@ function displayResults(response: QueryResponse, query: string) {
       <strong>SQL:</strong> <code>${response.sql}</code>
     </div>
   `;
-  
+
   // Display results table
   if (response.error) {
     resultsContainer.innerHTML = `<div class="error-message">${response.error}</div>`;
@@ -209,13 +209,45 @@ function displayResults(response: QueryResponse, query: string) {
     resultsContainer.innerHTML = '';
     resultsContainer.appendChild(table);
   }
-  
-  // Initialize toggle button
+
+  // Get the results header and set up actions
+  const resultsHeader = resultsSection.querySelector('.results-header') as HTMLElement;
+
+  // Remove old actions container if exists
+  const oldActionsContainer = resultsHeader.querySelector('.results-actions');
+  if (oldActionsContainer) {
+    oldActionsContainer.remove();
+  }
+
+  // Create new actions container with download button and toggle button
+  const actionsContainer = document.createElement('div');
+  actionsContainer.className = 'results-actions';
+
+  // Create download button (only if there are results)
+  if (!response.error && response.results.length > 0) {
+    const downloadButton = document.createElement('button');
+    downloadButton.className = 'download-results-button';
+    downloadButton.innerHTML = '&#8681; Download';
+    downloadButton.title = 'Download results as CSV';
+    downloadButton.onclick = () => api.exportResults(response.columns, response.results);
+    actionsContainer.appendChild(downloadButton);
+  }
+
+  // Move the toggle button into the actions container
   const toggleButton = document.getElementById('toggle-results') as HTMLButtonElement;
-  toggleButton.addEventListener('click', () => {
+
+  // Clone the toggle button to remove old event listeners
+  const newToggleButton = toggleButton.cloneNode(true) as HTMLButtonElement;
+  newToggleButton.addEventListener('click', () => {
     resultsContainer.style.display = resultsContainer.style.display === 'none' ? 'block' : 'none';
-    toggleButton.textContent = resultsContainer.style.display === 'none' ? 'Show' : 'Hide';
+    newToggleButton.textContent = resultsContainer.style.display === 'none' ? 'Show' : 'Hide';
   });
+
+  // Replace the old toggle button with the new one in the actions container
+  actionsContainer.appendChild(newToggleButton);
+
+  // Replace the old toggle button in the DOM
+  toggleButton.parentNode?.replaceChild(actionsContainer, toggleButton);
 }
 
 // Create results table
@@ -285,14 +317,27 @@ function displayTables(tables: TableSchema[]) {
     tableLeft.appendChild(tableName);
     tableLeft.appendChild(tableInfo);
     
+    // Create table actions container
+    const tableActions = document.createElement('div');
+    tableActions.className = 'table-actions';
+
+    const downloadButton = document.createElement('button');
+    downloadButton.className = 'download-table-button';
+    downloadButton.innerHTML = '&#8681;';
+    downloadButton.title = 'Download as CSV';
+    downloadButton.onclick = () => api.exportTable(table.name);
+
     const removeButton = document.createElement('button');
     removeButton.className = 'remove-table-button';
     removeButton.innerHTML = '&times;';
     removeButton.title = 'Remove table';
     removeButton.onclick = () => removeTable(table.name);
-    
+
+    tableActions.appendChild(downloadButton);
+    tableActions.appendChild(removeButton);
+
     tableHeader.appendChild(tableLeft);
-    tableHeader.appendChild(removeButton);
+    tableHeader.appendChild(tableActions);
     
     // Columns section
     const tableColumns = document.createElement('div');
