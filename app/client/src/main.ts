@@ -3,6 +3,25 @@ import { api } from './api/client'
 
 // Global state
 
+// Utility function to sanitize query text into a valid filename
+function sanitizeFilename(query: string): string {
+  if (!query || !query.trim()) {
+    return 'query-results';
+  }
+
+  let filename = query
+    .toLowerCase()
+    .trim()
+    .substring(0, 50) // Truncate to 50 characters max
+    .replace(/\s+/g, '_') // Replace spaces with underscores
+    .replace(/[<>:"/\\|?*]/g, '') // Remove invalid filename characters
+    .replace(/_+/g, '_') // Replace multiple underscores with single
+    .replace(/^_|_$/g, ''); // Remove leading/trailing underscores
+
+  // Fall back to default if result is empty
+  return filename || 'query-results';
+}
+
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
   initializeQueryInput();
@@ -236,7 +255,8 @@ function displayResults(response: QueryResponse, query: string) {
     downloadButton.className = 'download-results-button';
     downloadButton.innerHTML = '&#8681; Download';
     downloadButton.title = 'Download results as CSV';
-    downloadButton.onclick = () => api.exportResults(response.columns, response.results);
+    const filename = sanitizeFilename(query);
+    downloadButton.onclick = () => api.exportResults(response.columns, response.results, filename);
     actionsContainer.appendChild(downloadButton);
   }
 
