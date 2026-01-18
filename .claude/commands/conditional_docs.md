@@ -29,3 +29,11 @@ This prompt helps you determine what documentation you should read based on the 
 - adws/README.md
   - Conditions:
     - When you're operating in the `adws/` directory
+
+- app_docs/feature-f80ea819-one-click-table-exports.md
+  - Conditions:
+    - When implementing CSV export functionality
+    - When working with table or query result data exports
+    - When adding download buttons to the UI
+    - When troubleshooting export endpoint issues
+    - When modifying the ADW pipeline test configuration
