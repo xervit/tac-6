@@ -29,3 +29,11 @@ This prompt helps you determine what documentation you should read based on the 
 - adws/README.md
   - Conditions:
     - When you're operating in the `adws/` directory
+
+- app_docs/bug-d3aa734f-consecutive-query-clonenode-fix.md
+  - Conditions:
+    - When working with the displayResults() function in app/client/src/main.ts
+    - When debugging consecutive query execution issues
+    - When implementing features that manipulate the results section DOM
+    - When troubleshooting "Cannot read properties of null" errors related to cloneNode
+    - When working with the toggle button or results actions container
