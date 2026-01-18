@@ -333,55 +333,6 @@ h2 {
   color: var(--error-color);
 }
 
-.download-table-button {
-  background: none;
-  border: none;
-  font-size: 1.25rem;
-  color: var(--text-secondary);
-  cursor: pointer;
-  width: 2rem;
-  height: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  transition: all 0.2s;
-}
-
-.download-table-button:hover {
-  background: rgba(102, 126, 234, 0.1);
-  color: var(--primary-color);
-}
-
-.download-results-button {
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s;
-  background: var(--primary-color);
-  color: white;
-  margin-right: 0.5rem;
-}
-
-.download-results-button:hover {
-  background: var(--secondary-color);
-}
-
-.table-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.results-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
 /* Loading States */
 .loading {
   display: inline-block;
