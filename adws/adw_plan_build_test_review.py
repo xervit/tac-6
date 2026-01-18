@@ -17,9 +17,9 @@ This script runs the complete ADW pipeline:
 The scripts are chained together via persistent state (adw_state.json).
 """
 
+import os
 import subprocess
 import sys
-import os
 
 # Add the parent directory to Python path to import modules
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -75,7 +75,7 @@ def main():
         os.path.join(script_dir, "adw_test.py"),
         issue_number,
         adw_id,
-        "--skip-e2e",
+        # "--skip-e2e",
     ]
     print(f"Running: {' '.join(test_cmd)}")
     test = subprocess.run(test_cmd)
