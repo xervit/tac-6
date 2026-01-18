@@ -182,13 +182,14 @@ async function loadDatabaseSchema() {
 
 // Display query results
 function displayResults(response: QueryResponse, query: string) {
-  
+
   const resultsSection = document.getElementById('results-section') as HTMLElement;
   const sqlDisplay = document.getElementById('sql-display') as HTMLDivElement;
   const resultsContainer = document.getElementById('results-container') as HTMLDivElement;
-  
+  const resultsHeader = document.querySelector('.results-header') as HTMLElement;
+
   resultsSection.style.display = 'block';
-  
+
   // Display natural language query and SQL
   sqlDisplay.innerHTML = `
     <div class="query-display">
@@ -198,7 +199,7 @@ function displayResults(response: QueryResponse, query: string) {
       <strong>SQL:</strong> <code>${response.sql}</code>
     </div>
   `;
-  
+
   // Display results table
   if (response.error) {
     resultsContainer.innerHTML = `<div class="error-message">${response.error}</div>`;
@@ -209,13 +210,41 @@ function displayResults(response: QueryResponse, query: string) {
     resultsContainer.innerHTML = '';
     resultsContainer.appendChild(table);
   }
-  
+
+  // Create or update results actions container
+  let resultsActions = resultsHeader.querySelector('.results-actions') as HTMLDivElement;
+  if (!resultsActions) {
+    resultsActions = document.createElement('div');
+    resultsActions.className = 'results-actions';
+    resultsHeader.appendChild(resultsActions);
+  }
+  resultsActions.innerHTML = '';
+
+  // Add download button for results
+  const downloadResultsButton = document.createElement('button');
+  downloadResultsButton.className = 'download-results-button';
+  downloadResultsButton.innerHTML = '&#8681; Download';
+  downloadResultsButton.title = 'Download results as CSV';
+  downloadResultsButton.onclick = async () => {
+    try {
+      await api.exportResults(response.columns, response.results);
+    } catch (error) {
+      displayError(error instanceof Error ? error.message : 'Export failed');
+    }
+  };
+
   // Initialize toggle button
-  const toggleButton = document.getElementById('toggle-results') as HTMLButtonElement;
-  toggleButton.addEventListener('click', () => {
+  const toggleButton = document.createElement('button');
+  toggleButton.className = 'toggle-button';
+  toggleButton.id = 'toggle-results';
+  toggleButton.textContent = 'Hide';
+  toggleButton.onclick = () => {
     resultsContainer.style.display = resultsContainer.style.display === 'none' ? 'block' : 'none';
     toggleButton.textContent = resultsContainer.style.display === 'none' ? 'Show' : 'Hide';
-  });
+  };
+
+  resultsActions.appendChild(downloadResultsButton);
+  resultsActions.appendChild(toggleButton);
 }
 
 // Create results table
@@ -285,14 +314,33 @@ function displayTables(tables: TableSchema[]) {
     tableLeft.appendChild(tableName);
     tableLeft.appendChild(tableInfo);
     
+    // Create actions container for download and remove buttons
+    const tableActions = document.createElement('div');
+    tableActions.className = 'table-actions';
+
+    const downloadButton = document.createElement('button');
+    downloadButton.className = 'download-table-button';
+    downloadButton.innerHTML = '&#8681;';  // Down arrow icon
+    downloadButton.title = 'Download as CSV';
+    downloadButton.onclick = async () => {
+      try {
+        await api.exportTable(table.name);
+      } catch (error) {
+        displayError(error instanceof Error ? error.message : 'Export failed');
+      }
+    };
+
     const removeButton = document.createElement('button');
     removeButton.className = 'remove-table-button';
     removeButton.innerHTML = '&times;';
     removeButton.title = 'Remove table';
     removeButton.onclick = () => removeTable(table.name);
-    
+
+    tableActions.appendChild(downloadButton);
+    tableActions.appendChild(removeButton);
+
     tableHeader.appendChild(tableLeft);
-    tableHeader.appendChild(removeButton);
+    tableHeader.appendChild(tableActions);
     
     // Columns section
     const tableColumns = document.createElement('div');
