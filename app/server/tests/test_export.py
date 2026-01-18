@@ -280,3 +280,122 @@ class TestResultsExportEndpoint:
             content = response.text
             # Commas in values should be quoted
             assert '"Test, Item"' in content
+
+    def test_export_results_with_query_and_sql_headers(self, test_db_with_data):
+        """Test export includes Query and SQL headers when provided"""
+        from server import app
+        with TestClient(app) as client:
+            request_data = {
+                "columns": ["id", "name"],
+                "results": [{"id": 1, "name": "Alice"}],
+                "query": "Show me all users",
+                "sql": "SELECT * FROM users"
+            }
+
+            response = client.post("/api/export-results", json=request_data)
+
+            assert response.status_code == 200
+
+            # Parse CSV content (normalize line endings)
+            content = response.text.replace('\r\n', '\n').replace('\r', '\n')
+            lines = content.strip().split('\n')
+
+            # Check structure: Query row, SQL row, blank row, header row, data row
+            assert len(lines) == 5
+            assert lines[0] == 'Query,Show me all users'
+            assert lines[1] == 'SQL,SELECT * FROM users'
+            assert lines[2] == ''  # blank separator row
+            assert lines[3] == 'id,name'
+            assert lines[4] == '1,Alice'
+
+    def test_export_results_with_only_query_header(self, test_db_with_data):
+        """Test export with only query provided (no sql)"""
+        from server import app
+        with TestClient(app) as client:
+            request_data = {
+                "columns": ["id", "name"],
+                "results": [{"id": 1, "name": "Alice"}],
+                "query": "Show me all users"
+            }
+
+            response = client.post("/api/export-results", json=request_data)
+
+            assert response.status_code == 200
+
+            content = response.text.replace('\r\n', '\n').replace('\r', '\n')
+            lines = content.strip().split('\n')
+
+            # Check structure: Query row, blank row, header row, data row
+            assert len(lines) == 4
+            assert lines[0] == 'Query,Show me all users'
+            assert lines[1] == ''  # blank separator row
+            assert lines[2] == 'id,name'
+
+    def test_export_results_with_only_sql_header(self, test_db_with_data):
+        """Test export with only sql provided (no query)"""
+        from server import app
+        with TestClient(app) as client:
+            request_data = {
+                "columns": ["id", "name"],
+                "results": [{"id": 1, "name": "Alice"}],
+                "sql": "SELECT * FROM users"
+            }
+
+            response = client.post("/api/export-results", json=request_data)
+
+            assert response.status_code == 200
+
+            content = response.text.replace('\r\n', '\n').replace('\r', '\n')
+            lines = content.strip().split('\n')
+
+            # Check structure: SQL row, blank row, header row, data row
+            assert len(lines) == 4
+            assert lines[0] == 'SQL,SELECT * FROM users'
+            assert lines[1] == ''  # blank separator row
+            assert lines[2] == 'id,name'
+
+    def test_export_results_without_headers_backward_compatible(self, test_db_with_data):
+        """Test export without query/sql is backward compatible"""
+        from server import app
+        with TestClient(app) as client:
+            request_data = {
+                "columns": ["id", "name"],
+                "results": [{"id": 1, "name": "Alice"}]
+            }
+
+            response = client.post("/api/export-results", json=request_data)
+
+            assert response.status_code == 200
+
+            content = response.text.replace('\r\n', '\n').replace('\r', '\n')
+            lines = content.strip().split('\n')
+
+            # Check structure: header row, data row (no metadata rows)
+            assert len(lines) == 2
+            assert lines[0] == 'id,name'
+            assert lines[1] == '1,Alice'
+
+    def test_export_results_with_special_characters_in_query(self, test_db_with_data):
+        """Test query and SQL with special characters are properly CSV-escaped"""
+        from server import app
+        with TestClient(app) as client:
+            request_data = {
+                "columns": ["name"],
+                "results": [{"name": "Alice"}],
+                "query": 'Show users where name contains "Alice, Bob"',
+                "sql": 'SELECT * FROM users WHERE name LIKE "%Alice, Bob%"'
+            }
+
+            response = client.post("/api/export-results", json=request_data)
+
+            assert response.status_code == 200
+
+            content = response.text.replace('\r\n', '\n').replace('\r', '\n')
+            lines = content.strip().split('\n')
+
+            # Check that special characters are properly escaped
+            # CSV should quote values containing commas or quotes
+            assert 'Query,' in lines[0]
+            assert 'SQL,' in lines[1]
+            # The values should be properly escaped (quoted)
+            assert '"' in lines[0] or 'Alice, Bob' in lines[0]

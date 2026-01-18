@@ -236,7 +236,7 @@ function displayResults(response: QueryResponse, query: string) {
     downloadButton.className = 'download-results-button';
     downloadButton.innerHTML = '&#8681; Download';
     downloadButton.title = 'Download results as CSV';
-    downloadButton.onclick = () => api.exportResults(response.columns, response.results);
+    downloadButton.onclick = () => api.exportResults(response.columns, response.results, undefined, query, response.sql);
     actionsContainer.appendChild(downloadButton);
   }
 

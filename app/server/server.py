@@ -373,6 +373,15 @@ async def export_results(request: ExportResultsRequest):
         output = StringIO()
         writer = csv.writer(output)
 
+        # Write query and SQL metadata headers if provided
+        if request.query:
+            writer.writerow(["Query", request.query])
+        if request.sql:
+            writer.writerow(["SQL", request.sql])
+        # Add blank separator row if any metadata was written
+        if request.query or request.sql:
+            writer.writerow([])
+
         # Write header
         writer.writerow(request.columns)
 

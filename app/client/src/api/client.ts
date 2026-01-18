@@ -106,7 +106,7 @@ export const api = {
   },
 
   // Export query results as CSV
-  async exportResults(columns: string[], results: Record<string, unknown>[], filename?: string): Promise<void> {
+  async exportResults(columns: string[], results: Record<string, unknown>[], filename?: string, query?: string, sql?: string): Promise<void> {
     const url = `${API_BASE_URL}/export-results`;
     try {
       const response = await fetch(url, {
@@ -114,7 +114,7 @@ export const api = {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ columns, results, filename })
+        body: JSON.stringify({ columns, results, filename, query, sql })
       });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

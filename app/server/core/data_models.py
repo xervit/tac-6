@@ -91,3 +91,5 @@ class ExportResultsRequest(BaseModel):
     columns: List[str] = Field(..., description="Column names for CSV header")
     results: List[Dict[str, Any]] = Field(..., description="Query result rows")
     filename: Optional[str] = Field(None, description="Optional custom filename")
+    query: Optional[str] = Field(None, description="Original natural language query")
+    sql: Optional[str] = Field(None, description="Generated SQL statement")
