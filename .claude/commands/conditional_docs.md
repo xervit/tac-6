@@ -44,3 +44,10 @@ This prompt helps you determine what documentation you should read based on the 
     - When adding download buttons to the UI
     - When troubleshooting export endpoint issues
     - When modifying the ADW pipeline test configuration
+- app_docs/feature-71f548c7-csv-query-headers.md
+  - Conditions:
+    - When working with CSV export metadata or headers
+    - When implementing query context preservation in exports
+    - When modifying the ExportResultsRequest data model
+    - When troubleshooting CSV export formatting issues
+    - When adding metadata to exported files
